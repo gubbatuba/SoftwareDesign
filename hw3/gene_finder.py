@@ -2,11 +2,16 @@
 """
 Created on Sun Feb  2 11:24:42 2014
 
-@author: YOUR NAME HERE
+@author: Subhash Gubba
+
+Took help from Deniz Celik and Ryan Louie on this one
 """
 
 # you may find it useful to import these variables (although you are not required to use them)
 from amino_acids import aa, codons
+from random import shuffle
+from load import load_seq
+dna = load_seq("./data/X73525.fa")
 
 def collapse(L):
     """ Converts a list of strings to a string by concatenating all elements of the list """
@@ -25,12 +30,39 @@ def coding_strand_to_AA(dna):
         returns: a string containing the sequence of amino acids encoded by the
                  the input DNA fragment
     """
+    cuduns = []
+    pro = []
+    for i in range(len(dna)/3):
+        cuduns.append(dna[:3])
+        dna = dna[3:]
     
+    for x in range(len(cuduns)):
+        for i in codons:
+            for j in i:
+                if j == cuduns[x]:
+                    pro.append(aa[codons.index(i)])
+    return collapse(pro)
+         
     # YOUR IMPLEMENTATION HERE
+
 
 def coding_strand_to_AA_unit_tests():
     """ Unit tests for the coding_strand_to_AA function """
-        
+    a = coding_strand_to_AA('ATC')
+    b = coding_strand_to_AA('TCTCATATCACA')
+    a1 = 'I'
+    b1 = 'SHIT'
+    if a == a1:
+        print 'good'
+    else:
+        print 'bad'
+    
+    if b == b1:
+        print 'good'
+    else:
+        print 'bad'
+            
+coding_strand_to_AA_unit_tests()
     # YOUR IMPLEMENTATION HERE
 
 def get_reverse_complement(dna):
@@ -40,14 +72,30 @@ def get_reverse_complement(dna):
         dna: a DNA sequence represented as a string
         returns: the reverse complementary DNA sequence represented as a string
     """
-    
+    dna2 = " "
+    for i in range(len(dna)):        
+        if dna[i] == 'A':
+            dna2 += 'T'
+        elif dna[i] == 'T':
+            dna2 += 'A'
+        elif dna[i] == 'G':
+            dna2 += 'C'
+        elif dna[i] == 'C':
+            dna2 += 'G'
+        else:
+            print "error"
+    dna3 = dna2[::-1]
+    return dna3
     # YOUR IMPLEMENTATION HERE
-    
+
 def get_reverse_complement_unit_tests():
     """ Unit tests for the get_complement function """
-        
+    w = get_reverse_complement('AAATTTGGGCCC')
+    v = get_reverse_complement('ATGCCGTA')
+    print w
+    print v
     # YOUR IMPLEMENTATION HERE    
-
+get_reverse_complement_unit_tests()
 def rest_of_ORF(dna):
     """ Takes a DNA sequence that is assumed to begin with a start codon and returns
         the sequence up to but not including the first in frame stop codon.  If there
@@ -55,15 +103,54 @@ def rest_of_ORF(dna):
         
         dna: a DNA sequence
         returns: the open reading frame represented as a string
-    """
     
-    # YOUR IMPLEMENTATION HERE
+cidins = []
+ stops = ['TAG','TAA','TGA']
+    for i in range(((len(dna)/3)+1)):
+        cidins.append(dna[:3])
+        dna = dna[3:]
+    if cidins[-1]!='TAG' or cidins[-1]!='TAA' or cidins[-1]!='TGA':
+        cidins.append('TAG')
+    for x in range(len(cidins)):
+        for i in stops:
+            if i == cidins[x]:
+                return collapse(cidins[:x]) """
+                
+    frame = dna[:3]
+    newdna = ''
+    stop = codons[aa.index('|')]
+    while frame != stop[0] and frame != stop[1] and frame != stop[2] and frame:
+        newdna += frame
+        dna = dna[3:]
+        frame = dna[:3]
+        
+    return newdna
 
 def rest_of_ORF_unit_tests():
     """ Unit tests for the rest_of_ORF function """
-        
+    c = rest_of_ORF('ATGGTATTTTAAGGG')
+    d = rest_of_ORF('ATGGTATTTTGAGGG')
+    e = rest_of_ORF('ATGGTATTTTAGGGG')
+    f = rest_of_ORF('ATGTTTTAAGGG')
+    
+    if c == 'ATGGTATTT':
+        print 'good'
+    else:
+        print 'bad'
+    if d == 'ATGGTATTT':
+        print 'good'
+    else:
+        print 'bad'
+    if e == 'ATGGTATTT':
+        print 'good'
+    else:
+        print 'bad'
+    if f == 'ATGTTT':
+        print 'good'
+    else:
+        print 'bad'
     # YOUR IMPLEMENTATION HERE
-        
+rest_of_ORF_unit_tests()
 def find_all_ORFs_oneframe(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence and returns
         them as a list.  This function should only find ORFs that are in the default
@@ -74,13 +161,35 @@ def find_all_ORFs_oneframe(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    orfs = []
+    
+    
+    """while len(dna)>=3 and dna[:3] != 'ATG':
+        rORF = rest_of_ORF(dna)
+        print rORF  
+        orfs.append(rORF)
+        dna = dna[len(rORF)+3:]
+    """
+    while dna:
+        while dna and dna[:3] != 'ATG':
+            dna = dna[3:]
+        orf = (rest_of_ORF(dna))
+        orfs.append(orf)
+        dna = dna[len(orf)+3:]
+    return orfs
+    
+        
+    """
+    return orfs
+    """
+find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCCG")
     # YOUR IMPLEMENTATION HERE        
      
 def find_all_ORFs_oneframe_unit_tests():
     """ Unit tests for the find_all_ORFs_oneframe function """
-
+    
     # YOUR IMPLEMENTATION HERE
+    
 
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in all 3
@@ -91,13 +200,19 @@ def find_all_ORFs(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    ar = (find_all_ORFs_oneframe(dna))
+    ar.extend(find_all_ORFs_oneframe(dna[1:]))
+    ar.extend(find_all_ORFs_oneframe(dna[2:]))
     # YOUR IMPLEMENTATION HERE
-
+    return ar
 def find_all_ORFs_unit_tests():
     """ Unit tests for the find_all_ORFs function """
+    
+    test = find_all_ORFs("ATGCATGAATGTAG")
+    print test
         
     # YOUR IMPLEMENTATION HERE
+find_all_ORFs_unit_tests()
 
 def find_all_ORFs_both_strands(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence on both
@@ -106,9 +221,10 @@ def find_all_ORFs_both_strands(dna):
         dna: a DNA sequence
         returns: a list of non-nested ORFs
     """
-     
+    return find_all_ORFs(dna)+find_all_ORFs(get_reverse_complement(dna))
+    
     # YOUR IMPLEMENTATION HERE
-
+find_all_ORFs_both_strands("ATGCGAATGTAGCATCAAA")
 def find_all_ORFs_both_strands_unit_tests():
     """ Unit tests for the find_all_ORFs_both_strands function """
 
@@ -119,12 +235,14 @@ def longest_ORF(dna):
         as a string"""
 
     # YOUR IMPLEMENTATION HERE
-
+    return max(find_all_ORFs_both_strands(dna))
+    
+    
 def longest_ORF_unit_tests():
     """ Unit tests for the longest_ORF function """
-
+    print longest_ORF("ATGCGAATGTAGCATCAAA")
     # YOUR IMPLEMENTATION HERE
-
+longest_ORF_unit_tests()
 def longest_ORF_noncoding(dna, num_trials):
     """ Computes the maximum length of the longest ORF over num_trials shuffles
         of the specfied DNA sequence
@@ -132,9 +250,17 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
+        
+    dnl = list(dna)
+    shuffled=[]
+    for i in range(0,num_trials):
+        shuffle(dnl)
+        shuffled.append(len(longest_ORF(collapse(dnl))))
+        #shuffled[i] = len(longest_ORF(collapse(dnl)))
+    return max((shuffled))
 
     # YOUR IMPLEMENTATION HERE
-
+print longest_ORF_noncoding("ATGCGAATGTAGCATCAAA", 50)
 def gene_finder(dna, threshold):
     """ Returns the amino acid sequences coded by all genes that have an ORF
         larger than the specified threshold.
@@ -145,5 +271,11 @@ def gene_finder(dna, threshold):
         returns: a list of all amino acid sequences whose ORFs meet the minimum
                  length specified.
     """
-
+    dnx = find_all_ORFs_both_strands(dna)
+    dnx = [i for i in dnx if len(i)>threshold]
+    dnx = [coding_strand_to_AA(i) for i in dnx]
+    return dnx
+        
     # YOUR IMPLEMENTATION HERE
+
+print gene_finder(dna,444)

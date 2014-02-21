@@ -66,7 +66,7 @@ def evaluate_random_function(f, x, y):
     elif f[0] == "k":
         return evaluate_random_function(f[2],x,y)
     elif f[0] == "div-sum-rand":
-        return (((evaluate_random_function(f[1],x,y))/randint(2,100))+(evaluate_random_function(f[2],x,y))/randint(2,100))
+        return (((evaluate_random_function(f[1],x,y))/randint(2,3))+(evaluate_random_function(f[2],x,y))/randint(2,3))
     elif f[0] == "rando":
         land = [evaluate_random_function(f[1],x,y),evaluate_random_function(f[2],x,y)]
         return land[randint(0,1)]

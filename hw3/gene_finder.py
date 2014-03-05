@@ -11,7 +11,7 @@ Took help from Deniz Celik and Ryan Louie on this one
 from amino_acids import aa, codons
 from random import shuffle
 from load import load_seq
-dna = load_seq("./data/X73525.fa")
+#dna = load_seq("./data/X73525.fa")
 
 def collapse(L):
     """ Converts a list of strings to a string by concatenating all elements of the list """
@@ -35,7 +35,8 @@ def coding_strand_to_AA(dna):
     for i in range(len(dna)/3):
         cuduns.append(dna[:3])
         dna = dna[3:]
-    
+    		#Hmm, this is an interesting way to chunk your data. Its not bad though.
+
     for x in range(len(cuduns)):
         for i in codons:
             for j in i:
@@ -62,7 +63,9 @@ def coding_strand_to_AA_unit_tests():
     else:
         print 'bad'
             
-coding_strand_to_AA_unit_tests()
+coding_strand_to_AA_unit_tests()	#Any tests that you run should be in an if __main__
+									#statement ideally and generally should be removed
+									#before submitting your code
     # YOUR IMPLEMENTATION HERE
 
 def get_reverse_complement(dna):
@@ -72,7 +75,16 @@ def get_reverse_complement(dna):
         dna: a DNA sequence represented as a string
         returns: the reverse complementary DNA sequence represented as a string
     """
-    dna2 = " "
+
+    #This function is bugged!
+    # On my unit tests, this function returns exactly the right sequence, but it always
+    # adds a space at the end of the returned string, which screws up your later functions
+    # get_all_ORFs_both_strands and longest_ORF (Its only counted once in grading though)
+
+    dna2 = " "	#This is where the bug is coming from. If you are initilizing a string,
+    			# start out with "" rather than " ". Otherwise you are adding a space
+    			# to the beginning of the sequence, then reversing it to the end with
+    			# your [::-1] code at the end
     for i in range(len(dna)):        
         if dna[i] == 'A':
             dna2 += 'T'
@@ -84,7 +96,9 @@ def get_reverse_complement(dna):
             dna2 += 'G'
         else:
             print "error"
-    dna3 = dna2[::-1]
+    dna3 = dna2[::-1]	#Good use of this substringing, but you could also just
+    					# "return dna2[::-1]" rather than initilize a new variable.
+    					# Its mostly a matter of taste though.
     return dna3
     # YOUR IMPLEMENTATION HERE
 
@@ -120,6 +134,10 @@ cidins = []
     newdna = ''
     stop = codons[aa.index('|')]
     while frame != stop[0] and frame != stop[1] and frame != stop[2] and frame:
+    						#Hmm, once again this is a creative solution not to use an
+    						# iterator. It is quite elegantly compact. I will mention that
+    						# you could save even a bit more space by having your while use
+    						# the in keyword so it reads: "while frame and not frame in stop:"
         newdna += frame
         dna = dna[3:]
         frame = dna[:3]
@@ -170,18 +188,30 @@ def find_all_ORFs_oneframe(dna):
         orfs.append(rORF)
         dna = dna[len(rORF)+3:]
     """
+    #Use your IDE to comment sections in python - don't use docstrings as block comments
+    # because if you do they'll show up in a function's documentation. Its bad style
+
+
+    #This function is bugged! Often, it is appending '' to the lists that you
+    # are returning. This bug is cascading through the next two functions as well.
+
     while dna:
         while dna and dna[:3] != 'ATG':
             dna = dna[3:]
-        orf = (rest_of_ORF(dna))
+        orf = (rest_of_ORF(dna))	#I think the source of your bug is that if you iterate
+        							#dna down in your while loop to '', it still gets passed
+        							# to rest_of_ORF here and gets appended to your returned
+        							# string
         orfs.append(orf)
         dna = dna[len(orf)+3:]
     return orfs
     
+    #Nicely compact function
         
     """
-    return orfs
+    return ORFs
     """
+    # ^ Why is this doctring here?
 find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCCG")
     # YOUR IMPLEMENTATION HERE        
      
@@ -222,6 +252,8 @@ def find_all_ORFs_both_strands(dna):
         returns: a list of non-nested ORFs
     """
     return find_all_ORFs(dna)+find_all_ORFs(get_reverse_complement(dna))
+
+    	#Good. Nice one-liner
     
     # YOUR IMPLEMENTATION HERE
 find_all_ORFs_both_strands("ATGCGAATGTAGCATCAAA")
@@ -236,6 +268,9 @@ def longest_ORF(dna):
 
     # YOUR IMPLEMENTATION HERE
     return max(find_all_ORFs_both_strands(dna))
+    	#Good use of max, but I believe you need to include a "key=len" argument in there
+    	# this function is returning bugged because of the  all_ORFs_oneframe bug, but
+    	# otherwise this might give you issues. Just keep it in mind for the future
     
     
 def longest_ORF_unit_tests():
@@ -261,6 +296,7 @@ def longest_ORF_noncoding(dna, num_trials):
 
     # YOUR IMPLEMENTATION HERE
 print longest_ORF_noncoding("ATGCGAATGTAGCATCAAA", 50)
+
 def gene_finder(dna, threshold):
     """ Returns the amino acid sequences coded by all genes that have an ORF
         larger than the specified threshold.
@@ -278,4 +314,4 @@ def gene_finder(dna, threshold):
         
     # YOUR IMPLEMENTATION HERE
 
-print gene_finder(dna,444)
+#print gene_finder(dna,444)
